@@ -1,0 +1,4 @@
+numpy
+NREL-rex
+pytest
+sphinx
