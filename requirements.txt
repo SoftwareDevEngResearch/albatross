@@ -1,4 +1,5 @@
 numpy
 NREL-rex
 pytest
-sphinx
+sphinx==4.4.0
+myst-parser
