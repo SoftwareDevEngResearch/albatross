@@ -1,45 +1,48 @@
 # Defines all current wind datafiles, according to 
 # https://github.com/NREL/hsds-examples/blob/master/datasets/WINDToolkit.md
-wtk:
-  bangladesh:
-    year_range: [2014, 2017]
-    resolutions: ["hourly"]
-  canada:
-    year_range: [2007, 2014]
-    resolutions: ["hourly", "5min"]
-  canada_bc:
-    year_range: [2007, 2014]
-    resolutions: ["hourly"]
-  central_asia:
-    year_range: [2015, 2015]
-    resolutions: ["hourly"]
-  conus:
-    year_range: [2007, 2014] 
-    resolutions: ["hourly", "5min"]
-  hawaii:
-    year_range: [2000, 2019]
-    resolutions: ["hourly", "5min"]
-  india:
-    year_range: [2014, 2014]
-    resolutions: ["hourly"]
-  mexico:
-    year_range: [2007, 2014] 
-    resolutions: ["hourly", "5min"]
-  mid_atlantic:
-    year_range: [2000, 2020] 
-    resolutions: ["hourly", "5min"]
-  nw_pacific:
-    year_range: [2000, 2019] 
-    resolutions: ["hourly", "5min"]
-  offshore_ca:
-    year_range: [2000, 2019] 
-    resolutions: ["hourly", "5min"]
-  philippines:
-    year_range: [2017, 2017] 
-    resolutions: ["hourly"]
-  vietnam:
-    year_range: [2016, 2018] 
-    resolutions: ["hourly"]
+bangladesh:
+  year_range: [2014, 2017]
+  resolutions: ["hourly"]
+canada:
+  year_range: [2007, 2014]
+  resolutions: ["hourly", "5min"]
+canada_bc:
+  year_range: [2007, 2014]
+  resolutions: ["hourly"]
+central_asia:
+  year_range: [2015, 2015]
+  resolutions: ["hourly"]
+conus:
+  year_range: [2007, 2014] 
+  resolutions: ["hourly", "5min"]
+hawaii:
+  year_range: [2000, 2019]
+  resolutions: ["hourly", "5min"]
+  base: "Hawaii"
+india:
+  year_range: [2014, 2014]
+  resolutions: ["hourly"]
+mexico:
+  year_range: [2007, 2014] 
+  resolutions: ["hourly", "5min"]
+mid_atlantic:
+  year_range: [2000, 2020] 
+  resolutions: ["hourly", "5min"]
+  base: "Mid_Atlantic"
+nw_pacific:
+  year_range: [2000, 2019] 
+  resolutions: ["hourly", "5min"]
+  base: "NW_pacific"
+offshore_ca:
+  year_range: [2000, 2019] 
+  resolutions: ["hourly", "5min"]
+  base: "Offshore_CA"
+philippines:
+  year_range: [2017, 2017] 
+  resolutions: ["hourly"]
+vietnam:
+  year_range: [2016, 2018] 
+  resolutions: ["hourly"]
 
 
 
