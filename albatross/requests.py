@@ -1,3 +1,4 @@
+import json
 from .utils import _load_wtk
 
 def _build_url(region, year, resolution=None):
@@ -36,3 +37,23 @@ def request_wind_data(region, year, resolution=None):
     url = _build_url(region, year, resolution)
 
     return url
+
+
+def get_regions(pprint=False):
+    """
+    Returns the full set of regions with their configuration options.
+
+    Note that the `year_range` represents an inclusive (beginning, end), where
+    any specified value within that range is a valid year for that region.
+
+    Args:
+        pprint (bool): Pretty print results.
+
+    Returns:
+        dict: Regions and configuration options.
+    """
+    wtk = _load_wtk()
+    if pprint:
+        print(json.dumps(wtk, indent=4))
+
+    return wtk

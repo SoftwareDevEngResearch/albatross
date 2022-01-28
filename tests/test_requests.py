@@ -1,5 +1,6 @@
 import pytest
-from albatross.requests import request_wind_data
+from albatross.requests import request_wind_data, get_regions
+from albatross.utils import _load_wtk
 
 
 def test_request_wind_data_regions():
@@ -67,3 +68,8 @@ def test_request_wind_data_invalid_resolution():
     msg = 'resolution "%s" not available for region: %s' % (
         '1min', 'canada')
     assert str(e.value) == msg
+
+
+def test_get_regions(pprint=False):
+    wtk = _load_wtk()
+    assert get_regions() == wtk

@@ -1,4 +1,4 @@
-# Original Project Proposal
+# Original Proposal
 
 `albatross` is a Python package designed for wind energy analysis and visualization. It utilizes NREL's [Wind Integration National Dataset (WIND) Toolkit](https://www.nrel.gov/grid/wind-toolkit.html) and [REsource eXtraction (rex)](https://github.com/NREL/rex) package, and is inspired in part by a similar package aimed instead at Marine Renewable Energy, [MHKiT](https://github.com/MHKiT-Software/MHKiT-Python).
 
