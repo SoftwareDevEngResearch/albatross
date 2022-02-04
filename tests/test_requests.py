@@ -1,5 +1,12 @@
+import os
+
 import pytest
-from albatross.requests import request_wtk_point_data, get_regions, build_wtk_filepath
+from pandas import DataFrame
+
+from albatross import TESTDATADIR
+from albatross.requests import (request_wtk_point_data, get_regions,
+                                build_wtk_filepath, read_wtk_point_data)
+
 from albatross.utils import _load_wtk
 
 
@@ -23,7 +30,7 @@ def test_build_wtk_filepath_invalid_regions():
     """Test invalid `region` inputs for `build_wtk_filepath`."""
     with pytest.raises(AssertionError) as e:
         build_wtk_filepath('namek', 2007)
-    assert str(e.value) == 'region not found: namek' 
+    assert str(e.value) == 'region not found: namek'
 
 
 def test_build_wtk_filepath_years():
@@ -120,7 +127,7 @@ def test_request_wtk_point_data_invalid_lat_lon():
 
 
 def test_request_wtk_point_data_invalid_params():
-    """Test invalid `params` inputs for `request_wtk_point_data`"""
+    """Test invalid `params` inputs for `request_wtk_point_data`."""
     # wrong type
     params = 'bad'
 
@@ -150,3 +157,22 @@ def test_request_wtk_point_data_invalid_params():
 
     msg = '"params" elements must be strings'
     assert str(e.value) == msg
+
+
+def test_read_wtk_point_data():
+    """Tests `read_wtk_point_data`."""
+    path = os.path.join(TESTDATADIR, 'ri_100_wtk_2012.h5')
+    print(path)
+    lat_lon = (41.96364, -71.79364)
+
+    data, meta = read_wtk_point_data(path, lat_lon, ['windspeed_100m'])
+
+    assert type(data) == DataFrame
+    assert type(meta) == DataFrame
+
+    assert len(data) == 8784
+    assert len(data.columns) == 1
+    assert data.columns[:] == ['windspeed_100m']
+    assert data.loc['2012-01-01 00:00:00']['windspeed_100m'] == 7.25
+    assert len(meta) == 200
+    assert len(meta.columns[:]) == 8

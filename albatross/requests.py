@@ -49,9 +49,55 @@ def build_wtk_filepath(region, year, resolution=None):
     return base_url + url_region + file
 
 
+def read_wtk_point_data(wtk_file, lat_lon, params, tree=None, unscale=True,
+                        str_decode=True, group=None):
+    """
+    Reads WIND Toolkit data directly from a file.
+
+    Args:
+        wtk_file (:obj:`str`): file path
+        lat_lon (:obj:`list` of :obj:`float`): latitude/longitude point to
+          access
+        params (:obj:`list` of :obj:`str`): A list of parameters to include in
+          the dataset
+        resolution (:obj:`str`, optional): data resolution (see `get_regions`)
+        tree (:obj:`str`, optional): cKDTree or path to .pkl file containing
+          pre-computed tree of lat, lon coordinates, by default None
+        unscale (:obj:`bool`, optional): Boolean flag to automatically unscale
+          variables on extraction, by default True
+        str_decode (:obj:`bool`, optional): Boolean flag to decode the
+          bytestring meta data into normal strings. Setting this to False will
+          speed up the meta data read. by default True
+        group (:obj:`str`, optional): Group within .h5 resource file to open,
+          by default None
+
+    Returns:
+        tuple: A tuple `(data, metadata)` consisting of a `DataFrame` and associated
+        metadata.
+    """
+    kwargs = {
+        'tree': tree, 'unscale': unscale, 'str_decode': str_decode,
+        'group': group, 'hsds': False
+    }
+
+    results = []
+
+    with WindX(wtk_file, **kwargs) as f:
+        for param in params:
+            meta = f.meta
+            res = f.get_lat_lon_df(param, lat_lon)
+            col = res.columns[0]
+            res.rename(columns={col: param}, inplace=True)
+            results.append(res)
+
+    data = pd.concat(results, axis=1)
+
+    return (data, meta)
+
+
 def request_wtk_point_data(region, year, lat_lon, params, resolution=None,
-                            tree=None, unscale=True, str_decode=True,
-                            group=None, hsds=True):
+                           tree=None, unscale=True, str_decode=True,
+                           group=None):
     """
     Requests WIND Toolkit data from NREL HSDS.
 
@@ -73,8 +119,6 @@ def request_wtk_point_data(region, year, lat_lon, params, resolution=None,
           speed up the meta data read. by default True
         group (:obj:`str`, optional): Group within .h5 resource file to open,
           by default None
-        hsds (:obj:`bool`, optional): Boolean flag to use h5pyd to handle .h5
-          'files' hosted on AWS behind HSDS, by default True
 
     Returns:
         tuple: A tuple `(data, metadata)` consisting of a `DataFrame` and associated
@@ -94,7 +138,7 @@ def request_wtk_point_data(region, year, lat_lon, params, resolution=None,
 
     kwargs = {
         'tree': tree, 'unscale': unscale, 'str_decode': str_decode,
-        'group': group, 'hsds': hsds
+        'group': group, 'hsds': True
     }
 
     results = []
