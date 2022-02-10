@@ -31,7 +31,7 @@ def identify_regions(lat_lon, coordinates=False):
 
     wtk = _load_wtk()
     lat, lon = lat_lon
-    
+
     regions = []
 
     for region in wtk:
@@ -49,10 +49,10 @@ def identify_regions(lat_lon, coordinates=False):
                         regions.append({region: coordinates})
                 else:
                     regions.append(region)
-    
+
     if len(regions) == 0:
         raise ValueError('No region found for specified lat/lon point.')
-    
+
     return regions
 
 
@@ -157,8 +157,8 @@ def request_wtk_point_data(lat_lon, year, params, region=None, resolution=None,
                            tree=None, unscale=True, str_decode=True,
                            group=None):
     """
-    Requests WIND Toolkit data from NREL HSDS for a given lat/lon point. If a 
-    `region` is not specified, it will attempt to infer one using `identify_regions`. 
+    Requests WIND Toolkit data from NREL HSDS for a given lat/lon point. If a
+    `region` is not specified, it will attempt to infer one using `identify_regions`.
     However, if multiple regions are identified for the `lat_lon` provided, it will
     raise an error, prompting the user to explicitly provide one.
 
