@@ -1,5 +1,7 @@
 # albatross
 
+![example workflow](https://github.com/SoftwareDevEngResearch/albatross/actions/workflows/albatross.yml/badge.svg)
+
 ### Documentation
 
 Documentation is hosted at [Read the Docs](https://albatross-wind.readthedocs.io).
