@@ -23,7 +23,7 @@ def boxplot(data, fields=None, labels=None, **box_kwargs):
 
     Returns:
       tuple: A tuple (fig, ax) consisting of a `matplotlib.figure.Figure` and
-        `matplotlib.axes.Axes`.
+      `matplotlib.axes.Axes`.
     """
     assert isinstance(data, DataFrame), '"data" must be a DataFrame'
     if fields:
