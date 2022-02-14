@@ -6,3 +6,4 @@ myst-parser
 pyyaml
 pandas
 flake8
+matplotlib

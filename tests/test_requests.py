@@ -15,7 +15,7 @@ lat_lon = (39.913561, -105.222422)
 params = ['windspeed_90m']
 
 
-### Test `identify_regions` ###
+# Test `identify_regions` #
 
 
 def test_identify_regions_invalid_lat_lon():
@@ -77,9 +77,9 @@ def test_identify_regions():
         mid_lat = (lat_range[0]+lat_range[0])/2
         mid_lon = (lon_range[0]+lon_range[0])/2
         assert region in identify_regions((mid_lat, mid_lon))
-    
 
-### Test `build_wtk_filepath` ###
+
+# Test `build_wtk_filepath` #
 
 
 def test_build_wtk_filepath():
@@ -156,7 +156,7 @@ def test_build_wtk_filepath_invalid_resolution():
     assert str(e.value) == msg
 
 
-### Test `get_regions` ###
+# Test `get_regions` #
 
 
 def test_get_regions():
@@ -165,7 +165,7 @@ def test_get_regions():
     assert get_regions() == wtk
 
 
-### Test `request_wtk_point_data` ###
+# Test `request_wtk_point_data` #
 
 
 def test_request_wtk_point_data_invalid_lat_lon():
@@ -245,7 +245,7 @@ def test_request_wtk_point_data_multi_region():
     assert str(e.value) == msg
 
 
-### Test `read_wtk_point_data` ###
+# Test `read_wtk_point_data` #
 
 
 def test_read_wtk_point_data_invalid_lat_lon():
