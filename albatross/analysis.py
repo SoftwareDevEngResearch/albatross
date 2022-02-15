@@ -4,6 +4,7 @@ Provides analysis tools for wind data.
 
 import matplotlib.pyplot as plt
 from pandas import DataFrame
+from windrose import WindroseAxes
 
 
 def boxplot(data, fields=None, labels=None, **box_kwargs):
@@ -54,3 +55,49 @@ def boxplot(data, fields=None, labels=None, **box_kwargs):
     ax.set_xlabel('Elevation (m)', fontsize='large')
 
     return fig, ax
+
+
+def plot_windrose(data, speed=None, direction=None, **wr_kwargs):
+    """
+    Generates a windrose plot from the given data.
+
+    Args:
+      data (DataFrame): Wind data
+      speed (str, optional): Wind speed column name. If not provided, it will be inferred
+        from `data`. It will take the first column containing the string 'windspeed'.
+      direction (str, optional): Wind direction column name. If not provided, it will be
+        inferred from `data`. It will take the first column containing the string `winddirection`.
+      wr_kwargs (dict, optional): Additional windrose parameters. See
+        https://windrose.readthedocs.io for more info.
+
+    Returns:
+      WindroseAxes: A `WindroseAxes` instance.
+    """
+    assert isinstance(data, DataFrame), '"data" must be a DataFrame'
+    if speed:
+        assert isinstance(speed, str), '"speed" must be a string'
+        assert speed in data, "column not found: %s" % speed
+        ws = list(data[speed])
+    if direction:
+        assert isinstance(direction, str), '"direction" must be a string'
+        assert direction in data, 'column not found: %s' % direction
+        wd = list(data[direction])
+
+    if not speed:
+        fields = list(filter(lambda x: 'windspeed' in x, data.columns[:]))
+        assert len(fields) > 0, 'unable to infer wind speed data column'
+        ws_field = fields[0]
+        ws = list(data[ws_field])
+
+    if not direction:
+        fields = list(filter(lambda x: 'winddirection' in x, data.columns[:]))
+        assert len(fields) > 0, 'unable to infer wind direction data column'
+        wd_field = fields[0]
+        wd = list(data[wd_field])
+
+    # NOTE: this is a workaround for a current bug in the `windrose` package
+    ax = WindroseAxes.from_ax(theta_labels=["E", "N-E", "N", "N-W", "W", "S-W", "S", "S-E"])
+    ax.bar(wd, ws, normed=True, opening=0.8, edgecolor='white', **wr_kwargs)
+    ax.set_legend()
+
+    return ax
