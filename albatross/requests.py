@@ -44,9 +44,7 @@ def identify_regions(lat_lon, coordinates=False):
                     wtk_file = build_wtk_filepath(region, wtk[region]['year_range'][1])
 
                     with WindX(wtk_file, hsds=True) as f:
-                        coordinates = f.coordinates
-
-                        regions.append({region: coordinates})
+                        regions.append({region: f.coordinates})
                 else:
                     regions.append(region)
 
