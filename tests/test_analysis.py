@@ -2,9 +2,22 @@ import os
 
 import pytest
 
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+
 from albatross import TESTDATADIR
 from albatross.requests import read_wtk_point_data
-from albatross.analysis import boxplot, plot_windrose
+from albatross.analysis import boxplot, plot_windrose, pdf
+
+
+@pytest.fixture
+def data():
+    path = os.path.join(TESTDATADIR, 'ri_100_wtk_2012.h5')
+    lat_lon = (41.96364, -71.79364)
+
+    data, meta = read_wtk_point_data(path, lat_lon, ['windspeed_100m'])
+
+    return data
 
 
 def test_boxplot_invalid_data():
@@ -16,13 +29,8 @@ def test_boxplot_invalid_data():
     assert str(e.value) == msg
 
 
-def test_boxplot_invalid_fields():
+def test_boxplot_invalid_fields(data):
     """Test invalid `fields` inputs for `boxplot`."""
-    path = os.path.join(TESTDATADIR, 'ri_100_wtk_2012.h5')
-    lat_lon = (41.96364, -71.79364)
-
-    data, _ = read_wtk_point_data(path, lat_lon, ['windspeed_100m'])
-
     with pytest.raises(AssertionError) as e:
         boxplot(data, fields='bad')
 
@@ -36,13 +44,8 @@ def test_boxplot_invalid_fields():
     assert str(e.value) == msg
 
 
-def test_boxplot_invalid_labels():
+def test_boxplot_invalid_labels(data):
     """Test invalid `labels` inputs for `boxplot`."""
-    path = os.path.join(TESTDATADIR, 'ri_100_wtk_2012.h5')
-    lat_lon = (41.96364, -71.79364)
-
-    data, _ = read_wtk_point_data(path, lat_lon, ['windspeed_100m'])
-
     with pytest.raises(AssertionError) as e:
         boxplot(data, labels='bad')
 
@@ -56,13 +59,8 @@ def test_boxplot_invalid_labels():
     assert str(e.value) == msg
 
 
-def test_boxplot():
+def test_boxplot(data):
     """Test invalid `data` inputs for `boxplot`."""
-    path = os.path.join(TESTDATADIR, 'ri_100_wtk_2012.h5')
-    lat_lon = (41.96364, -71.79364)
-
-    data, _ = read_wtk_point_data(path, lat_lon, ['windspeed_100m'])
-
     boxplot(data)
 
     # TODO: add image comparison testing https://matplotlib.org/stable/devel/testing.html#writing-an-image-comparison-test # noqa
@@ -79,13 +77,8 @@ def test_windrose_invalid_data():
     assert str(e.value) == msg
 
 
-def test_windrose_invalid_speed():
+def test_windrose_invalid_speed(data):
     """Test invalid `speed` inputs for `plot_windrose`."""
-    path = os.path.join(TESTDATADIR, 'ri_100_wtk_2012.h5')
-    lat_lon = (41.96364, -71.79364)
-
-    data, _ = read_wtk_point_data(path, lat_lon, ['windspeed_100m'])
-
     with pytest.raises(AssertionError) as e:
         plot_windrose(data, speed=1)
 
@@ -99,13 +92,8 @@ def test_windrose_invalid_speed():
     assert str(e.value) == msg
 
 
-def test_windrose_invalid_direction():
+def test_windrose_invalid_direction(data):
     """Test invalid `direction` inputs for `plot_windrose`."""
-    path = os.path.join(TESTDATADIR, 'ri_100_wtk_2012.h5')
-    lat_lon = (41.96364, -71.79364)
-
-    data, _ = read_wtk_point_data(path, lat_lon, ['winddirection_100m'])
-
     with pytest.raises(AssertionError) as e:
         plot_windrose(data, direction=1)
 
@@ -158,3 +146,52 @@ def test_windrose():
     data.rename(columns={'windspeed_100m': 'ws', 'winddirection_100m': 'wd'}, inplace=True)
 
     plot_windrose(data, speed='ws', direction='wd')
+
+
+# test `pdf`
+
+
+def test_pdf_invalid_kwargs(data):
+    """Test invalid `_kwargs` inputs for `pdf`."""
+
+    with pytest.raises(AssertionError) as e:
+        pdf(data, hist_kwargs='bad')
+
+    msg = '"hist_kwargs" must be a dict'
+    assert str(e.value) == msg
+
+    with pytest.raises(AssertionError) as e:
+        pdf(data, plot_kwargs='bad')
+
+    msg = '"plot_kwargs" must be a dict'
+    assert str(e.value) == msg
+
+
+def test_pdf_invalid_speed(data):
+    """Test invalid `speed` inputs for `pdf`."""
+    with pytest.raises(AssertionError) as e:
+        pdf(data, speed=1)
+
+    msg = '"speed" must be a string'
+    assert str(e.value) == msg
+
+    with pytest.raises(AssertionError) as e:
+        pdf(data, speed='bad')
+
+    msg = 'column not found: bad'
+    assert str(e.value) == msg
+
+
+def test_pdf(data):
+    """Test `pdf`."""
+    res = pdf(data)
+    assert len(res) == 3
+
+    fig, ax, params = res
+
+    assert isinstance(fig, Figure)
+    assert isinstance(ax, Axes)
+    assert len(params) == 4
+    assert all([isinstance(x, (float, int)) for x in params])
+
+    # TODO: add image comparison testing https://matplotlib.org/stable/devel/testing.html#writing-an-image-comparison-test # noqa

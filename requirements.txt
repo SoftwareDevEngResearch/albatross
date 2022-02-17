@@ -8,3 +8,4 @@ pandas
 flake8
 matplotlib
 windrose
+scipy

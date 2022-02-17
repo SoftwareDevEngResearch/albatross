@@ -5,6 +5,7 @@ Provides analysis tools for wind data.
 import matplotlib.pyplot as plt
 from pandas import DataFrame
 from windrose import WindroseAxes
+from scipy import stats
 
 
 def boxplot(data, fields=None, labels=None, **box_kwargs):
@@ -27,21 +28,22 @@ def boxplot(data, fields=None, labels=None, **box_kwargs):
       `matplotlib.axes.Axes`.
     """
     assert isinstance(data, DataFrame), '"data" must be a DataFrame'
+
     if fields:
         assert isinstance(fields, list), '"fields" must be a list or None'
         msg = '"fields" elements must be strings'
         assert all([isinstance(f, str) for f in fields]), msg
+
     if labels:
         assert isinstance(labels, list), '"labels" must be a list or None'
         msg = '"labels" elements must be strings'
         assert all([isinstance(label, str) for label in labels]), msg
+    else:
+        labels = fields
 
     if not fields and not labels:
         fields = list(filter(lambda x: 'windspeed' in x, data.columns[:]))
         labels = [field.split('_')[1] for field in fields]
-
-    if not labels:
-        labels = fields
 
     x = [list(data[field]) for field in fields]
     fig, ax = plt.subplots()
@@ -74,6 +76,7 @@ def plot_windrose(data, speed=None, direction=None, **wr_kwargs):
       WindroseAxes: A `WindroseAxes` instance.
     """
     assert isinstance(data, DataFrame), '"data" must be a DataFrame'
+
     if speed:
         assert isinstance(speed, str), '"speed" must be a string'
         assert speed in data, "column not found: %s" % speed
@@ -101,3 +104,64 @@ def plot_windrose(data, speed=None, direction=None, **wr_kwargs):
     ax.set_legend()
 
     return ax
+
+
+def pdf(data, speed=None, hist_kwargs=None, plot_kwargs=None):
+    """
+    Generates a windrose plot from the given data.
+
+    Args:
+      data (DataFrame): Wind data
+      speed (str, optional): Wind speed column name. If not provided, it will be inferred
+        from `data`. It will take the first column containing the string 'windspeed'.
+      direction (str, optional): Wind direction column name. If not provided, it will be
+        inferred from `data`. It will take the first column containing the string `winddirection`.
+      hist_kwargs (dict, optional): Additional histogram parameters.
+      plot_kwargs (dict, optional): Additional plot parameters.
+
+    Returns:
+      tuple: (fig, ax, params) consisting of a `matplotlib.figure.Figure`,
+      `matplotlib.axes.Axes`, and 4-element tuple of floats/ints representing
+      shape (2), location, and scale.
+    """
+    assert isinstance(data, DataFrame), '"data" must be a DataFrame'
+
+    plot_kwargs = plot_kwargs or {}
+    hist_kwargs = hist_kwargs or {}
+
+    assert isinstance(plot_kwargs, dict), '"plot_kwargs" must be a dict'
+    assert isinstance(hist_kwargs, dict), '"hist_kwargs" must be a dict'
+
+    if speed:
+        assert isinstance(speed, str), '"speed" must be a string'
+        assert speed in data, "column not found: %s" % speed
+        ws = list(data[speed])
+    else:
+        fields = list(filter(lambda x: 'windspeed' in x, data.columns[:]))
+        assert len(fields) > 0, 'unable to infer wind speed data column'
+        ws_field = fields[0]
+        ws = list(data[ws_field])
+
+    # Fit Weibull function
+    params = stats.exponweib.fit(ws, floc=0, f0=1)
+
+    # Plotting
+
+    fig, ax = plt.subplots()
+
+    # Histogram
+    bins = round(max(ws))+5
+    values, bins, hist = ax.hist(ws, bins=bins, density=True, lw=1, ec='black', **hist_kwargs)
+    center = (bins[:-1] + bins[1:]) / 2.
+
+    # Using all params and the `pdf` function
+    ax.plot(
+        center,
+        stats.exponweib.pdf(center, *params),
+        lw=2, label='Weibull', color='r', **plot_kwargs)
+
+    ax.set_xlabel('Wind Speed (m/s)', fontsize='large')
+    ax.set_ylabel('Probability Density', fontsize='large')
+    ax.legend()
+
+    return fig, ax, params
