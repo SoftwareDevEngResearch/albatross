@@ -1,13 +1,15 @@
 import os
+from numpy import isin
 
 import pytest
 
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+from pandas import DataFrame
 
 from albatross import TESTDATADIR
 from albatross.requests import read_wtk_point_data
-from albatross.analysis import boxplot, plot_windrose, pdf
+from albatross.analysis import boxplot, get_diurnal_stats, plot_diurnal_stats, plot_windrose, pdf
 
 
 @pytest.fixture
@@ -195,3 +197,85 @@ def test_pdf(data):
     assert all([isinstance(x, (float, int)) for x in params])
 
     # TODO: add image comparison testing https://matplotlib.org/stable/devel/testing.html#writing-an-image-comparison-test # noqa
+
+
+# test get_diurnal_stats
+
+def test_get_diurnal_stats_invalid_data():
+    """Test invalid `data` inputs for `get_diurnal_stats`."""
+    with pytest.raises(AssertionError) as e:
+        get_diurnal_stats({})
+
+    msg = '"data" must be a DataFrame'
+    assert str(e.value) == msg
+
+
+def test_get_diurnal_stats_invalid_speed(data):
+    """Test invalid `speed` inputs for `get_diurnal_stats`."""
+    with pytest.raises(AssertionError) as e:
+        get_diurnal_stats(data, speed=1)
+
+    msg = '"speed" must be a string'
+    assert str(e.value) == msg
+
+    with pytest.raises(AssertionError) as e:
+        get_diurnal_stats(data, speed='bad')
+
+    msg = 'column not found: bad'
+    assert str(e.value) == msg
+
+
+def test_get_diurnal_stats(data):
+    "Test `get_diurnal_stats`."
+    df = get_diurnal_stats(data)
+
+    assert isinstance(df, DataFrame)
+
+    cols = ['Mean', 'Mean+Std', 'Mean-Std', '10th Percentile', 'Median', '90th Percentile']
+
+    for i, col in enumerate(df.columns):
+        assert col == cols[i]
+        assert len(df[col]) == 24
+
+
+# Test `plot_diurnal_stats`
+
+
+def test_plot_diurnal_stats_invalid_data():
+    """Test invalid `data` inputs for `plot_diurnal_stats`."""
+    with pytest.raises(AssertionError) as e:
+        plot_diurnal_stats({})
+
+    msg = '"data" must be a DataFrame'
+    assert str(e.value) == msg
+
+
+def test_plot_diurnal_stats_invalid_speed(data):
+    """Test invalid `speed` inputs for `plot_diurnal_stats`."""
+    with pytest.raises(AssertionError) as e:
+        plot_diurnal_stats(data, speed=1)
+
+    msg = '"speed" must be a string'
+    assert str(e.value) == msg
+
+    with pytest.raises(AssertionError) as e:
+        plot_diurnal_stats(data, speed='bad')
+
+    msg = 'column not found: bad'
+    assert str(e.value) == msg
+
+
+def test_plot_diurnal_stats(data):
+    """Test `plot_diurnal_stats`."""
+    res = plot_diurnal_stats(data)
+
+    assert len(res) == 3
+
+    (fig, ax, df) = res
+
+    assert isinstance(fig, Figure)
+    assert isinstance(ax, Axes)
+    assert isinstance(df, DataFrame)
+
+    # should be 6 lines plotted
+    assert len(ax.get_lines()) == 6

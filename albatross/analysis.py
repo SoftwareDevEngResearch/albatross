@@ -3,9 +3,11 @@ Provides analysis tools for wind data.
 """
 
 import matplotlib.pyplot as plt
+import pandas
 from pandas import DataFrame
 from windrose import WindroseAxes
 from scipy import stats
+import numpy as np
 
 
 def boxplot(data, fields=None, labels=None, **box_kwargs):
@@ -114,8 +116,6 @@ def pdf(data, speed=None, hist_kwargs=None, plot_kwargs=None):
       data (DataFrame): Wind data
       speed (str, optional): Wind speed column name. If not provided, it will be inferred
         from `data`. It will take the first column containing the string 'windspeed'.
-      direction (str, optional): Wind direction column name. If not provided, it will be
-        inferred from `data`. It will take the first column containing the string `winddirection`.
       hist_kwargs (dict, optional): Additional histogram parameters.
       plot_kwargs (dict, optional): Additional plot parameters.
 
@@ -165,3 +165,73 @@ def pdf(data, speed=None, hist_kwargs=None, plot_kwargs=None):
     ax.legend()
 
     return fig, ax, params
+
+
+def get_diurnal_stats(data, speed=None):
+    """
+    Returns basic relevant diurnal wind speed statistics for the given data.
+
+    Args:
+      data (DataFrame): Wind data
+      speed (str, optional): Wind speed column name. If not provided, it will be inferred
+        from `data`. It will take the first column containing the string 'windspeed'.
+
+    Returns:
+      DataFrame: A DataFrame consisting of an hourly time index, and columns representing
+      various diurnal wind speed statistics for the given wind speed.
+    """
+    assert isinstance(data, DataFrame), '"data" must be a DataFrame'
+    if speed:
+        assert isinstance(speed, str), '"speed" must be a string'
+        assert speed in data, "column not found: %s" % speed
+        ws = data[speed]
+    else:
+        fields = list(filter(lambda x: 'windspeed' in x, data.columns[:]))
+        assert len(fields) > 0, 'unable to infer wind speed data column'
+        ws_field = fields[0]
+        ws = data[ws_field]
+
+    mean = ws.groupby(data.index.hour).mean()
+    plus_std = mean + ws.groupby(data.index.hour).std()
+    minus_std = mean - ws.groupby(data.index.hour).std()
+    p_10 = ws.groupby(data.index.hour).quantile(q=.1)
+    median = ws.groupby(data.index.hour).median()
+    p_90 = ws.groupby(data.index.hour).quantile(q=.9)
+
+    df = pandas.concat([mean, plus_std, minus_std, p_10, median, p_90], axis=1)
+
+    df.columns = ['Mean', 'Mean+Std', 'Mean-Std', '10th Percentile', 'Median', '90th Percentile']
+
+    return df
+
+
+def plot_diurnal_stats(data, speed=None):
+    """
+    Plots basic relevant diurnal wind speed statistics for the given data.
+
+    Args:
+      data (DataFrame): Wind data
+      speed (str, optional): Wind speed column name. If not provided, it will be inferred
+        from `data`. It will take the first column containing the string 'windspeed'.
+
+    Returns:
+      tuple: A tuple (fig, ax, df) consisting of a `matplotlib.figure.Figure`,
+      `matplotlib.axes.Axes`, and a `pandas.DataFrame` (same data as `get_diurnal_stats`).
+    """
+
+    # data/field validation performed in this function
+    stats_df = get_diurnal_stats(data, speed)
+
+    markers = ('+', '*', '.', '2', 'x', '')
+
+    fig, ax = plt.subplots()
+
+    for i, label in enumerate(stats_df):
+        ax.plot(stats_df[label], label=label, marker=markers[i])
+
+    ax.set_xlabel('Hour')
+    ax.set_ylabel('Wind Speed (m/s)')
+    ax.set_xticks(np.arange(0, 23, 2))
+    ax.legend()
+
+    return fig, ax, stats_df
