@@ -242,6 +242,6 @@ def get_regions(pprint=False):
     """
     wtk = _load_wtk()
     if pprint:
-        print(json.dumps(wtk, indent=4))
+        print(json.dumps(wtk, indent=3))
 
     return wtk
