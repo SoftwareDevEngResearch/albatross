@@ -4,10 +4,12 @@ Provides analysis tools for wind data.
 
 import matplotlib.pyplot as plt
 import pandas
-from pandas import DataFrame
+from pandas import DataFrame, Grouper
 from windrose import WindroseAxes
 from scipy import stats
 import numpy as np
+
+from .classes import WindTurbine
 
 
 def boxplot(data, fields=None, labels=None, **box_kwargs):
@@ -235,3 +237,42 @@ def plot_diurnal_stats(data, speed=None):
     ax.legend()
 
     return fig, ax, stats_df
+
+
+def turbulence_std(data, turbine, speed=None, b=5.6):
+    """
+    Calculates the turbulence standard deviation.
+
+    Args:
+      data (Union[float, DataFrame]): Wind speed velocity (m/s) at hub height.
+      turbine (WindTurbine): A `WindTurbine` instance.
+      b (float, optional): Additional adjustment parameter (m/s)
+
+    Returns:
+      float: Turbulence standard deviation.
+    """
+    assert isinstance(data, (float, DataFrame)), '"data" must be a float or DataFrame'
+    assert isinstance(turbine, WindTurbine), '"turbine" must be a WindTurbine'
+
+    if isinstance(data, float):
+        return turbine.i_ref*(0.75*data + b)
+
+    if speed:
+        assert isinstance(speed, str), '"speed" must be a string'
+        assert speed in data, "column not found: %s" % speed
+        ws = data[speed]
+    else:
+        fields = list(filter(lambda x: 'windspeed' in x, data.columns[:]))
+        assert len(fields) > 0, 'unable to infer wind speed data column'
+        ws_field = fields[0]
+        ws = data[ws_field]
+
+    # Group wind speeds by 10min averages, should work for any resolution
+    ws_avg = ws.groupby(Grouper(freq='10min')).mean()
+    df = DataFrame(ws_avg)
+    df.columns = ['turbulence_std']
+
+    # Apply std calc for every row
+    df = df.apply(lambda d: turbine.i_ref*(0.75*d + b))
+
+    return df
