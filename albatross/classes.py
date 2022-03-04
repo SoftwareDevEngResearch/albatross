@@ -43,19 +43,16 @@ class WindTurbine:
 
     Turbines are classified in terms of both wind speed and turbulence. Wind speed categories are
     I, II, III; and turbulence categories are A+, A, B, C. Each category has associated
-    reference values that may be used in calculations. _Custom implementations (Class S) are
-    not yet supported._
+    reference values that may be used in calculations. Custom implementations (Class S) are
+    not yet supported.
+
+    .. image:: ../docs/turbine_classification.png
     """
     def __init__(self, wind_speed_class, turbulence_class):
         """
-        Initializes a `WindTurbine`.
-
         Args:
           wind_speed_class (str): A wind speed classification.
           turbulence_class (str): A turbulence classification.
-
-        Returns:
-          A `WindTurbine` instance.
         """
         self._validate_wind_speed_class(wind_speed_class)
         self._validate_turbulence_class(turbulence_class)
