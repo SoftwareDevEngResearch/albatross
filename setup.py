@@ -6,7 +6,7 @@ https://github.com/pypa/sampleproject
 """
 
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages
+from setuptools import setup#, find_packages
 import pathlib
 
 here = pathlib.Path(__file__).parent.resolve()
@@ -150,6 +150,8 @@ setup(
         'pyyaml',
         'pandas',
         'matplotlib',
+        'windrose',
+        'scipy',
     ],
 
     # List additional groups of dependencies here (e.g. development
@@ -166,7 +168,7 @@ setup(
             'myst-parser',
             'flake8',
         ],
-        'test': ['pytest'],
+        'test': ['pytest', 'tables'],
     },
 
     # If there are data files included in your packages that need to be
