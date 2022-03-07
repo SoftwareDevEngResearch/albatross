@@ -229,7 +229,7 @@ def request_wtk_point_data(lat_lon, year, params, region=None, resolution=None,
 
 def get_regions(pprint=False):
     """
-    Returns the full set of regions with their configuration options.
+    Returns the full set of available regions with their configuration options.
 
     Note that the `year_range` represents an inclusive (beginning, end), where
     any specified value within that range is a valid year for that region.

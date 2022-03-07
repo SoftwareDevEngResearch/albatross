@@ -112,7 +112,7 @@ def plot_windrose(data, speed=None, direction=None, **wr_kwargs):
 
 def pdf(data, speed=None, hist_kwargs=None, plot_kwargs=None):
     """
-    Generates a windrose plot from the given data.
+    Generates a Weibull probability density plot from the given data.
 
     Args:
       data (DataFrame): Wind data
