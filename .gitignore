@@ -132,3 +132,4 @@ dmypy.json
 *build/
 
 .DS_Store
+.vscode/
